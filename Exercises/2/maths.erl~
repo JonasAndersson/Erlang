@@ -17,6 +17,8 @@ create(0)->
     [];
 create(N) -> create(N,[]).
 create(N,List) when N > 0 ->  
-    create(N-1,[N|List]). 
+    create(N-1,[N|List]); 
+->
+    List.
     
 

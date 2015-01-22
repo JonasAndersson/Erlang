@@ -1,0 +1,9 @@
+%Exercise 2.4 Erlang
+%Jonas Andersson, jonand4
+%db.erl
+
+-module(db).
+-export([new/0]).
+
+new()->
+    [].
