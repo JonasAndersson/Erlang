@@ -27,7 +27,18 @@ destroy(Db) ->
 %{Key, Value, LeftBranch, RightBranch} for nodes and
 % 'empty' atoms for leaves.
 write(Key, Element, Db) when Db =/= {empty}->
-    {notemptylist};
-write(Key, Element, Db) -> {Key, Element, empty, empty}.
+    {TempKey,TempValue,Less,More} = Db,
+    Bool = Key<TempKey,
+    case Bool of
+	true -> case Less of
+		    empty-> {TempKey,TempValue,{Key,Element,Empty,Empty},More};
+		    _ -> write(Key, Element, Less)
+		end;
+	false -> case More of
+		     empty ->{TempKey,TempValue,Less,{Key,Element,Empty,Empty}};
+		     _ -> write(Key,Element,More)
+		 end,
+    end.
+write(Key, Element, Db) -> {Key,Element,Db}.
 
     

@@ -15,7 +15,7 @@
 
 %Creates new reference to an empty list.
 new() ->
-    {empty,empty,empty,empty}.
+    {empty}.
 
 % This drops the reference to the db.
 % as mentioned in the literature, if a file or db exists, this needs to be deleted aswell.
@@ -28,20 +28,17 @@ destroy(Db) ->
 % 'empty' atoms for leaves.
 write(Key, Element, Db) when Db =/= {empty}->
     {TempKey,TempValue,Less,More} = Db,
-
-    if
-	Key < TempKey ->
-	    case Less of
-		empty ->{TempKey,TempValue,{Key,Element,empty,empty},More};
-		_ -> write(Key,Element,Less)
-	     end%;
-%	Key => TempKey ->
-%	    case More of
-%		empty -> {TempKey,TempValue,Less,{Key,Element,Empty,Empty}};
-%		_ -> write(Key,Element,More)
-%	    end
+    Bool = Key<TempKey,
+    case Bool of
+	true -> case Less of
+		    empty -> {TempKey,TempValue,{Key,Element,Empty,Empty},More};
+		 _    -> write(Key, Element, Less)
+		end;
+	false -> case More of
+		     empty ->{TempKey,TempValue,Less,{Key,Element,Empty,Empty}};
+		   -> write(Key,Element,More)
+		 end
     end.
- 
-
+write(Key, Element, Db) -> {Key,Element,Db}.
 
     
