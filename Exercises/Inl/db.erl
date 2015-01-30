@@ -1,47 +1,71 @@
-%Assignment 3.* in textbook or 2.7 in handout.
 %Jonas Andersson, jonand4
-%db.erl
+%Exercise 2.7 from handouts.
 
-% The db should be able to:
-% new -> create a new list.
-% destroy - > remove the db.
-% write -> create new element in db.
-% delete -> remove item from db.
-% read -> read item from db.
-% match -> search for full match in db.
+-module(db).
+-export([new/0,write/3,read/2,delete/2, match/2, destroy/1]).
 
--module(db). 
--export([new/0,destroy/1,write/3]).
-
-%Creates new reference to an empty list.
+%Returns empty tuple. (Reference to new Db)
 new() ->
-    {empty,empty,empty,empty}.
+    {node, empty}.
 
-% This drops the reference to the db.
-% as mentioned in the literature, if a file or db exists, this needs to be deleted aswell.
+%Deletes the entire db, if a file or similar exists this must be removed.
 destroy(Db) ->
     ok.
 
-%This should write a new tuple to db. If tuple exists this should be an update.
-%The tree structure should be:
-%{Key, Value, LeftBranch, RightBranch} for nodes and
-% 'empty' atoms for leaves.
-write(Key, Element, Db) when Db =/= {empty}->
-    {TempKey,TempValue,Less,More} = Db,
+%Matching empty node and writes to it.
+write(Key, Value, {node, empty}) ->
+    {node, {Key, Value, {node, empty}, {node,empty}}};
 
-    if
-	Key < TempKey ->
-	    case Less of
-		empty ->{TempKey,TempValue,{Key,Element,empty,empty},More};
-		_ -> write(Key,Element,Less)
-	     end%;
-%	Key => TempKey ->
-%	    case More of
-%		empty -> {TempKey,TempValue,Less,{Key,Element,Empty,Empty}};
-%		_ -> write(Key,Element,More)
-%	    end
-    end.
- 
+%Matching node and checks if it Key is less then the current Key
+write(Key, Value,{node,{ OldKey, OldValue, Less, More}}) when Key < OldKey ->
+    {node,{OldKey, OldValue, write(Key, Value, Less), More}};
+
+%Matching node and checks if it Key is less then the current Key
+write(Key, Value, {node, {OldKey,OldValue, Less,More}}) when Key > OldKey ->
+    {node, {OldKey, OldValue, Less, write(Key,Value,More)}};
+
+%Matching key and replaces it with the new value . (Update)
+write(Key, Value, {node, {Key,_, Less,More}}) ->
+    {node, {Key,Value,Less,More}}.
+
+%Tries to find Key in the tree and returns the value.
+%First clause catches if db is empty or on a leaf. (Ie. Key not found).
+read(_, {node, empty})->
+    undefined;
+
+%Stops at this clause if key is found and then returns its value.
+read(Key, {node, {Key,Value,_,_}}) ->
+    {Key, Value};
+
+%Goes to Less node through the tree until empty node is hit.
+read(Key, {node,{CurrentKey,_,Less,_}}) when Key < CurrentKey ->
+    read(Key, Less);
+
+%Goes to More node if it exists.
+read(Key,{node,{_,_,_,More}}) ->
+    read(Key, More).
+
+%Finds and deletes the Key. Returns a new "updated" reference to Db.
+delete(Key, {node,empty})->
+    {node, empty};
+%If key is found, remove it and attach leaves correctly. (Matches Key and Key).
+delete(Key,{node,{Key, Value, Less, More}}) ->  
+   % {node,empty},
+  %  write(),
+  %  write();
+    delete_inner();
+%Runs left in the tree.
+delete(Key, {node,{CurrentKey,_,Less,_}}) when Key<CurrentKey ->
+    delete(Key,Less);
+%Runs right in the tree.
+delete(Key,{node,{_,_,_,More}}) ->
+    delete(Key,More).
+
+delete_inner() ->
+    ok.
+
+%Returns a list of Keys that matches the Value.
+match(Value, {node,empty}) ->
+    stub.
 
 
-    
